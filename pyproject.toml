@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gmailmbox"
+version = "0.1.0"
+description = "Sync Gmail to .mbox via the API"
+requires-python = ">=3.7"
+dependencies = [
+    "google-auth~=2.34.0",
+    "google-auth-oauthlib~=1.2.1",
+    "google-auth-httplib2~=0.2.0",
+    "google-api-python-client~=2.142.0",
+]
+
+[project.scripts]
+gmailmbox = "gmailmbox:main"
+
+[tool.setuptools]
+py-modules = ["gmailmbox"]
