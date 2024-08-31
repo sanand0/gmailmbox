@@ -27,5 +27,20 @@ Then install and run:
 ```bash
 python -m venv venv
 source venv/bin/activate
-python gmailmbox.py
+python gmailmbox.py --mbox emails.mbox --q "in:anywhere -in:spam -in:trash -invite"
+
+# To refresh only new emails:
+python gmailmbox.py --mbox emails.mbox --q "in:anywhere -in:spam -in:trash -invite" --update
 ```
+
+This will sync all emails that match the query to the .mbox file.
+
+<!--
+
+In my laptop, I run:
+
+cd /github/sanand0/gmailmbox
+source venv/Scripts/activate
+python gmailmbox.py --mbox C:/Anand/Mail/straive.mbox  --update
+
+-->

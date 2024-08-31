@@ -11,7 +11,7 @@ from googleapiclient.discovery import build
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
-def main():
+def main(q, mbox, update):
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
     else:
@@ -25,29 +25,24 @@ def main():
         with open("token.json", "w") as token_file:
             token_file.write(creds.to_json())
     service = build("gmail", "v1", credentials=creds)
-    mbox = mailbox.mbox("emails.mbox")
+    mbox = mailbox.mbox(mbox)
     mbox_ids = {msg["X-Gmail-Message-ID"] for msg in mbox}
 
     # Initialize token and message list
     page_token = None
     try:
         while True:
-            search_params = {
-                "q": "in:anywhere -in:spam -in:trash -invite",
-                "userId": "me",
-                "maxResults": 100,
-                "pageToken": page_token,
-            }
+            mbox_count = len(mbox_ids)
+            search_params = {"q": q, "userId": "me", "maxResults": 100, "pageToken": page_token}
             results = service.users().messages().list(**search_params).execute()
             messages = results.get("messages", [])
-
             if not messages:
                 break
 
             # Iterate through each message
             for message in messages:
                 if message["id"] in mbox_ids:
-                    print(f"SKIP {message['id']}")
+                    print(f"SKIP  {message['id']}")
                     continue
                 req = service.users().messages().get(userId="me", id=message["id"], format="raw")
                 msg = req.execute()
@@ -59,7 +54,12 @@ def main():
                 mbox_message.add_header('X-Gmail-Message-ID', message["id"])
                 mbox.add(mbox_message)
                 mbox_ids.add(message["id"])
-                print(f"{len(mbox_ids):04d} {message['id']}")
+                print(f"{len(mbox_ids):05d} {message['id']}")
+
+            # If no new emails were added, assume all old emails were added
+            if update and mbox_count == len(mbox_ids):
+                print("DONE  --update")
+                break
 
             # Get the next page token, if available
             page_token = results.get("nextPageToken")
@@ -71,4 +71,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Sync Gmail to .mbox via the API")
+    parser.add_argument("--mbox", type=str, default="emails.mbox", help="Path to .mbox file")
+    parser.add_argument(
+        "--q", type=str, default="in:anywhere -in:spam -in:trash -invite", help="Gmail search"
+    )
+    parser.add_argument("--update", action="store_true", help="Only update new emails")
+
+    args = parser.parse_args()
+    main(mbox=args.mbox, q=args.q, update=args.update)
