@@ -1,3 +1,12 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "google-api-python-client",
+#     "google-auth",
+#     "google-auth-httplib2",
+#     "google-auth-oauthlib",
+# ]
+# ///
 import base64
 import mailbox
 import os
@@ -33,7 +42,12 @@ def main(q, mbox, update):
     try:
         while True:
             mbox_count = len(mbox_ids)
-            search_params = {"q": q, "userId": "me", "maxResults": 100, "pageToken": page_token}
+            search_params = {
+                "q": q,
+                "userId": "me",
+                "maxResults": 100,
+                "pageToken": page_token,
+            }
             results = service.users().messages().list(**search_params).execute()
             messages = results.get("messages", [])
             if not messages:
@@ -51,7 +65,7 @@ def main(q, mbox, update):
                 email_message = message_from_bytes(raw_email)
                 mbox_message = mailbox.mboxMessage(email_message)
                 mbox_message.set_from("MAILER-DAEMON", True)
-                mbox_message.add_header('X-Gmail-Message-ID', message["id"])
+                mbox_message.add_header("X-Gmail-Message-ID", message["id"])
                 mbox.add(mbox_message)
                 mbox_ids.add(message["id"])
                 print(f"{len(mbox_ids):05d} {message['id']}")

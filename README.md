@@ -25,12 +25,14 @@ Here is my link: https://console.cloud.google.com/apis/credentials?authuser=2&pr
 Then install and run:
 
 ```bash
-python gmailmbox.py --mbox emails.mbox --q "in:anywhere -in:spam -in:trash -invite"
-# or
-uv run gmailmbox.py --mbox emails.mbox --q "in:anywhere -in:spam -in:trash -invite"
+# Fetch all emails (excludes spam, trash, and invites by default)
+uv run gmailmbox.py --mbox emails.mbox
 
-# To refresh only new emails:
-uv run gmailmbox.py --mbox emails.mbox --q "in:anywhere -in:spam -in:trash -invite" --update
+# Refresh only new emails
+uv run gmailmbox.py --mbox emails.mbox --update
+
+# Refresh only new emails matching a query
+uv run gmailmbox.py --mbox emails.mbox --update --q "from:user@example.com"
 ```
 
 This will sync all emails that match the query to the .mbox file.
@@ -45,6 +47,6 @@ Parameters:
 
 In my laptop, I run:
 
-cd /github/sanand0/gmailmbox
-uv run gmailmbox.py --mbox C:/Anand/Mail/straive.mbox  --update
+cd ~/code/gmailmbox
+uv run gmailmbox.py --mbox ~/Anand/Mail/straive.mbox --update
 -->
